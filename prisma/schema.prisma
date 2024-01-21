@@ -1,0 +1,70 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  firstName  String
+  lastName  String
+  password  String
+  orders  Order[]
+}
+
+model Product {
+  id    Int     @id @default(autoincrement())
+  name  String
+  price Float
+  orders ProductOnOrder[]
+}
+
+model ArchivedProduct {
+  id    Int     @id @default(autoincrement())
+  name  String
+  price Float
+  invoiceId Int
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+}
+
+model Order {
+  id    Int     @id @default(autoincrement())
+  user  User  @relation(fields: [userId], references: [id])
+  price Float
+  userId Int
+  products ProductOnOrder[]
+  invoices  Invoice[]
+}
+
+model ProductOnOrder {
+  productId Int
+  product Product @relation(fields: [productId], references: [id])
+  orderId Int
+  order Order @relation(fields: [orderId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@id([productId, orderId])
+}
+
+model Invoice {
+  id    Int     @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  quantity  Int @default(0)
+  totalPrice  Float @default(0)
+  orderId Int
+  order Order @relation(fields: [orderId], references: [id])
+  products ArchivedProduct[]
+}
+
+// model Post {
+//   id        Int     @id @default(autoincrement())
+//   title     String
+//   content   String?
+//   published Boolean @default(false)
+//   author    User    @relation(fields: [authorId], references: [id])
+//   authorId  Int
+// }
